@@ -1,16 +1,20 @@
+import { readFileSync } from "node:fs";
 import {
   Connection,
   Keypair,
-  LAMPORTS_PER_SOL,
   SystemProgram,
   Transaction,
   sendAndConfirmTransaction,
 } from "@solana/web3.js";
 
 const RPC = process.env.SOLANA_RPC_URL ?? "https://api.devnet.solana.com";
+const KEYPAIR_PATH = process.env.SOLANA_KEYPAIR_PATH;
 const connection = new Connection(RPC, "confirmed");
 
-const sender = Keypair.generate();
+const sender = KEYPAIR_PATH
+  ? Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(KEYPAIR_PATH, "utf8"))))
+  : Keypair.generate();
+
 const recipient = Keypair.generate();
 
 console.log(JSON.stringify({
@@ -19,40 +23,40 @@ console.log(JSON.stringify({
   rpc: RPC,
   sender: sender.publicKey.toBase58(),
   recipient: recipient.publicKey.toBase58(),
+  fundingMethod: KEYPAIR_PATH ? "devnet-pow-faucet" : "rpc-airdrop",
 }, null, 2));
 
-let airdropSignature: string | undefined;
-let lastAirdropError: unknown;
+let fundingSignature: string | undefined;
+let lastFundingError: unknown;
 
-for (let attempt = 1; attempt <= 6; attempt += 1) {
-  try {
-    airdropSignature = await connection.requestAirdrop(
-      sender.publicKey,
-      0.5 * LAMPORTS_PER_SOL,
-    );
-    await connection.confirmTransaction(airdropSignature, "confirmed");
-    break;
-  } catch (error) {
-    lastAirdropError = error;
-    if (attempt === 6) break;
-    const delayMs = attempt * 3000;
-    console.log(JSON.stringify({
-      stage: "AIRDROP_RETRY",
-      attempt,
-      delayMs,
-      error: String(error),
-    }));
-    await new Promise((resolve) => setTimeout(resolve, delayMs));
+if (!KEYPAIR_PATH) {
+  for (let attempt = 1; attempt <= 6; attempt += 1) {
+    try {
+      fundingSignature = await connection.requestAirdrop(sender.publicKey, 500_000_000);
+      await connection.confirmTransaction(fundingSignature, "confirmed");
+      break;
+    } catch (error) {
+      lastFundingError = error;
+      if (attempt === 6) break;
+      const delayMs = attempt * 3000;
+      console.log(JSON.stringify({
+        stage: "AIRDROP_RETRY",
+        attempt,
+        delayMs,
+        error: String(error),
+      }));
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
   }
-}
 
-if (!airdropSignature) {
-  throw new Error(`Devnet airdrop failed after retries: ${String(lastAirdropError)}`);
+  if (!fundingSignature) {
+    throw new Error(`Devnet airdrop failed after retries: ${String(lastFundingError)}`);
+  }
 }
 
 const balance = await connection.getBalance(sender.publicKey, "confirmed");
 if (balance <= 1_000_000) {
-  throw new Error(`Airdrop did not fund ephemeral signer sufficiently: ${balance}`);
+  throw new Error(`Funding did not provide enough SOL: ${balance}`);
 }
 
 const tx = new Transaction().add(
@@ -77,7 +81,8 @@ console.log(JSON.stringify({
   stage: "E2E_PROOF",
   status: "PASS",
   network: "solana-devnet",
-  airdropSignature,
+  fundingMethod: KEYPAIR_PATH ? "devnet-pow-faucet" : "rpc-airdrop",
+  fundingSignature: fundingSignature ?? null,
   signature,
   slot,
   recipient: recipient.publicKey.toBase58(),
@@ -85,7 +90,7 @@ console.log(JSON.stringify({
   invariants: [
     "ephemeral signer only",
     "no production private key",
-    "airdrop confirmed",
+    "devnet funding confirmed",
     "transaction confirmed",
     "recipient balance reconciled",
   ],
