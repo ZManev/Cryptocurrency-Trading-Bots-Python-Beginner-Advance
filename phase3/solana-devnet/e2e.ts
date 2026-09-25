@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs";
 import {
   Connection,
   Keypair,
@@ -8,12 +7,9 @@ import {
 } from "@solana/web3.js";
 
 const RPC = process.env.SOLANA_RPC_URL ?? "https://api.devnet.solana.com";
-const KEYPAIR_PATH = process.env.SOLANA_KEYPAIR_PATH;
 const connection = new Connection(RPC, "confirmed");
 
-const sender = KEYPAIR_PATH
-  ? Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(KEYPAIR_PATH, "utf8"))))
-  : Keypair.generate();
+const sender = Keypair.generate();
 
 const recipient = Keypair.generate();
 
@@ -23,13 +19,13 @@ console.log(JSON.stringify({
   rpc: RPC,
   sender: sender.publicKey.toBase58(),
   recipient: recipient.publicKey.toBase58(),
-  fundingMethod: KEYPAIR_PATH ? "devnet-pow-faucet" : "rpc-airdrop",
+  fundingMethod: "rpc-airdrop",
 }, null, 2));
 
 let fundingSignature: string | undefined;
 let lastFundingError: unknown;
 
-if (!KEYPAIR_PATH) {
+{
   for (let attempt = 1; attempt <= 6; attempt += 1) {
     try {
       fundingSignature = await connection.requestAirdrop(sender.publicKey, 500_000_000);
@@ -81,7 +77,7 @@ console.log(JSON.stringify({
   stage: "E2E_PROOF",
   status: "PASS",
   network: "solana-devnet",
-  fundingMethod: KEYPAIR_PATH ? "devnet-pow-faucet" : "rpc-airdrop",
+  fundingMethod: "rpc-airdrop",
   fundingSignature: fundingSignature ?? null,
   signature,
   slot,
