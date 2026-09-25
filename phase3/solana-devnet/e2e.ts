@@ -7,7 +7,7 @@ import {
 } from "@solana/web3.js";
 
 const RPC = process.env.SOLANA_RPC_URL ?? "https://api.devnet.solana.com";
-const connection = new Connection(RPC, "confirmed");
+const connection = new Connection(RPC, { commitment: "confirmed", httpHeaders: { Origin: "https://www.alchemy.com" } });
 
 const sender = Keypair.generate();
 
