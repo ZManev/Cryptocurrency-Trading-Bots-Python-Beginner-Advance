@@ -16,7 +16,6 @@ jobs:
         python-version: '3.10'
     - name: Add conda to system path
       run: |
-        # $CONDA is an environment variable pointing to the root of the miniconda directory
         echo $CONDA/bin >> $GITHUB_PATH
     - name: Install dependencies
       run: |
@@ -24,11 +23,27 @@ jobs:
     - name: Lint with flake8
       run: |
         conda install flake8
-        # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
         conda install pytest
         pytest
+
+  solana-devnet-e2e:
+    name: Phase 3 - Solana Devnet E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install E2E harness
+        working-directory: phase3/solana-devnet
+        run: npm install --no-audit --no-fund
+      - name: Run Solana Devnet E2E
+        working-directory: phase3/solana-devnet
+        env:
+          SOLANA_RPC_URL: https://api.devnet.solana.com
+        run: npm run e2e
