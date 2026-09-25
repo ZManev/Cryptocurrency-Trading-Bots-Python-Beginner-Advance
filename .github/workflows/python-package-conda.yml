@@ -35,21 +35,44 @@ jobs:
         pytest
 
   solana-devnet-e2e:
-    name: Phase 3 - Solana Devnet E2E
+    name: Phase 3 - Solana Devnet E2E + PostgreSQL
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: crypto_platform
+          POSTGRES_USER: crypto
+          POSTGRES_PASSWORD: phase3_ci_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U crypto -d crypto_platform"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Initialize PostgreSQL ledger
+        env:
+          PGPASSWORD: phase3_ci_password
+        run: psql -h 127.0.0.1 -U crypto -d crypto_platform -f phase3/database/001_phase3_ledger.sql
       - name: Install E2E harness
         working-directory: phase3/solana-devnet
         run: npm install --no-audit --no-fund
-      - name: Run Solana Devnet E2E
+      - name: Run Solana Devnet E2E + ledger reconciliation
         working-directory: phase3/solana-devnet
         env:
           SOLANA_RPC_URL: ${{ secrets.SOLANA_RPC_URL }}
           SOLANA_AIRDROP_LAMPORTS: 500000000
           SOLANA_CONFIRM_TIMEOUT_MS: 90000
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+          PGDATABASE: crypto_platform
+          PGUSER: crypto
+          PGPASSWORD: phase3_ci_password
         run: npm run e2e
