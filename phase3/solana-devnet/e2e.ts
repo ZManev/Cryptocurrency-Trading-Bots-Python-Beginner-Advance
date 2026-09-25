@@ -4,12 +4,16 @@ import pg from "pg";
 import { executeRaydiumDevnetSwap } from "./raydium-execution-adapter.js";
 
 const { Pool } = pg;
-const RPC = process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com";
+const RPC = process.env.SOLANA_RPC_URL || "";
 const AIRDROP_LAMPORTS = Number(process.env.SOLANA_AIRDROP_LAMPORTS || "500000000");
 const SWAP_INPUT_LAMPORTS = process.env.RAYDIUM_SWAP_INPUT_LAMPORTS || "10000000";
 const OUTPUT_MINT =
   process.env.RAYDIUM_OUTPUT_MINT || "7i5XE77hnx1a6hjWgSuYwmqdmLoDJNTU1rYA6Gqx7QiE";
 const SLIPPAGE_BPS = Number(process.env.RAYDIUM_SLIPPAGE_BPS || "100");
+
+if (!RPC) {
+  throw new Error("SOLANA_RPC_URL is required for the real DEX E2E; configure a dedicated Devnet RPC in GitHub Actions Secrets.");
+}
 
 if (!Number.isSafeInteger(AIRDROP_LAMPORTS) || AIRDROP_LAMPORTS <= 1_000_000) {
   throw new Error("SOLANA_AIRDROP_LAMPORTS must be a safe integer greater than 1,000,000");
