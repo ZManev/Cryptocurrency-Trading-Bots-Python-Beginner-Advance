@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-crypto_platform}
+      POSTGRES_USER: ${POSTGRES_USER:-crypto}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../../phase3/database/001_phase3_ledger.sql:/docker-entrypoint-initdb.d/001_phase3_ledger.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-crypto} -d ${POSTGRES_DB:-crypto_platform}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  solana-devnet-e2e:
+    build:
+      context: ../../phase3/solana-devnet
+    profiles: ["e2e"]
+    environment:
+      SOLANA_RPC_URL: ${SOLANA_RPC_URL:-https://api.devnet.solana.com}
+      SOLANA_AIRDROP_LAMPORTS: ${SOLANA_AIRDROP_LAMPORTS:-500000000}
+      SOLANA_CONFIRM_TIMEOUT_MS: ${SOLANA_CONFIRM_TIMEOUT_MS:-90000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
