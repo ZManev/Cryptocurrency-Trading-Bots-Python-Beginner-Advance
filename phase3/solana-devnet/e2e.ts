@@ -14,7 +14,7 @@ const SLIPPAGE_BPS = Number(process.env.RAYDIUM_SLIPPAGE_BPS || "100");
 if (!Number.isSafeInteger(AIRDROP_LAMPORTS) || AIRDROP_LAMPORTS <= 1_000_000) {
   throw new Error("SOLANA_AIRDROP_LAMPORTS must be a safe integer greater than 1,000,000");
 }
-if (!/^\\d+$/.test(SWAP_INPUT_LAMPORTS) || BigInt(SWAP_INPUT_LAMPORTS) <= 0n) {
+if (!/^\d+$/.test(SWAP_INPUT_LAMPORTS) || BigInt(SWAP_INPUT_LAMPORTS) <= 0n) {
   throw new Error("RAYDIUM_SWAP_INPUT_LAMPORTS must be a positive integer string");
 }
 if (!Number.isInteger(SLIPPAGE_BPS) || SLIPPAGE_BPS < 1 || SLIPPAGE_BPS > 10000) {
