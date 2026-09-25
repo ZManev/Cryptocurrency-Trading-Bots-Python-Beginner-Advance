@@ -21,5 +21,5 @@ jobs:
       - name: Run Solana Devnet E2E
         working-directory: phase3/solana-devnet
         env:
-          SOLANA_RPC_URL: https://api.devnet.solana.com
+          SOLANA_RPC_URL: https://demo.helius.dev/api/rpc?network=devnet
         run: npm run e2e
