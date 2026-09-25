@@ -44,3 +44,26 @@ The compose deployment automatically initializes:
 ## Deployment definition
 
 This package is deployable infrastructure, but a successful Solana E2E proof still requires an actually funded Devnet execution. A CI green build alone is not treated as financial execution evidence.
+
+
+## Real DEX E2E
+
+Phase 3 now executes a real **Raydium Devnet swap** instead of a SystemProgram transfer.
+
+Evidence path:
+
+    OrderIntent
+      -> RiskApproval
+      -> ExecutionRequest / Gate=ALLOW
+      -> Raydium Trade V2
+      -> on-chain swap transaction
+      -> observed output-token balance
+      -> PostgreSQL Fill
+      -> ReconciliationResult=RECONCILED
+      -> AuditEvent
+
+The E2E signer is generated ephemerally inside the test process. No production private key is stored in GitHub.
+
+Raydium's current SDK/demo documents Devnet routing through the SDK's Trade V2 path and Devnet program IDs; the E2E uses that adapter with an explicit output mint, 0.01 SOL input, and 100 bps maximum slippage.
+
+For local execution, set RAYDIUM_OUTPUT_MINT to a currently liquid Raydium Devnet token and run the E2E profile after PostgreSQL is healthy.
