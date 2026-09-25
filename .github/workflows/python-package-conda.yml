@@ -1,6 +1,10 @@
 name: Python Package using Conda
 
-on: [push]
+on:
+  push:
+    branches:
+      - "phase-3/solana-devnet-e2e"
+  workflow_dispatch:
 
 jobs:
   build-linux:
@@ -33,7 +37,7 @@ jobs:
   solana-devnet-e2e:
     name: Phase 3 - Solana Devnet E2E
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -45,5 +49,7 @@ jobs:
       - name: Run Solana Devnet E2E
         working-directory: phase3/solana-devnet
         env:
-          SOLANA_RPC_URL: https://solana-devnet.g.alchemy.com/v2/docs-demo
+          SOLANA_RPC_URL: ${{ secrets.SOLANA_RPC_URL }}
+          SOLANA_AIRDROP_LAMPORTS: 500000000
+          SOLANA_CONFIRM_TIMEOUT_MS: 90000
         run: npm run e2e
