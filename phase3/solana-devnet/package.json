@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": { "e2e": "tsx e2e.ts" },
+  "dependencies": {
+    "@solana/web3.js": "^1.98.4",
+    "tsx": "^4.19.2"
+  }
+}
