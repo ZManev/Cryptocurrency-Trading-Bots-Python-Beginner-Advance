@@ -99,3 +99,18 @@ CREATE TABLE IF NOT EXISTS kill_switch_state (
 
 CREATE INDEX IF NOT EXISTS idx_fills_execution_id ON fills(execution_id);
 CREATE INDEX IF NOT EXISTS idx_audit_correlation_id ON audit_events(correlation_id);
+
+
+CREATE TABLE IF NOT EXISTS reconciliation_results (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    execution_id UUID NOT NULL REFERENCES execution_requests(id),
+    status TEXT NOT NULL,
+    expected_quantity NUMERIC(38,18) NOT NULL,
+    observed_quantity NUMERIC(38,18) NOT NULL,
+    transaction_id TEXT NOT NULL,
+    details JSONB NOT NULL DEFAULT '{}',
+    reconciled_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_reconciliation_execution_id
+    ON reconciliation_results(execution_id);
