@@ -42,17 +42,8 @@ jobs:
       - name: Install E2E harness
         working-directory: phase3/solana-devnet
         run: npm install --no-audit --no-fund
-      - name: Generate ephemeral Devnet keypair
-        working-directory: phase3/solana-devnet
-        run: |
-          node --input-type=module -e 'import { Keypair } from "@solana/web3.js"; import { writeFileSync } from "node:fs"; writeFileSync("/tmp/phase3-keypair.json", JSON.stringify(Array.from(Keypair.generate().secretKey)))'
-      - name: Install Devnet proof-of-work faucet CLI
-        run: cargo install devnet-pow --version 0.1.4
-      - name: Fund ephemeral signer from Devnet PoW faucet
-        run: devnet-pow mine --target-lamports 20000000 --url dev --keypair-path /tmp/phase3-keypair.json
       - name: Run Solana Devnet E2E
         working-directory: phase3/solana-devnet
         env:
-          SOLANA_RPC_URL: https://api.devnet.solana.com
-          SOLANA_KEYPAIR_PATH: /tmp/phase3-keypair.json
+          SOLANA_RPC_URL: https://solana-devnet.g.alchemy.com/v2/docs-demo
         run: npm run e2e
