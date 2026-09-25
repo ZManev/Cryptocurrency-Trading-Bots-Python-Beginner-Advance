@@ -1,0 +1,25 @@
+name: Phase 3 - Solana Devnet E2E
+
+on:
+  push:
+    branches:
+      - "phase-3/solana-devnet-e2e"
+  workflow_dispatch:
+
+jobs:
+  solana-devnet-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install E2E harness
+        working-directory: phase3/solana-devnet
+        run: npm install --no-audit --no-fund
+      - name: Run Solana Devnet E2E
+        working-directory: phase3/solana-devnet
+        env:
+          SOLANA_RPC_URL: https://api.devnet.solana.com
+        run: npm run e2e
