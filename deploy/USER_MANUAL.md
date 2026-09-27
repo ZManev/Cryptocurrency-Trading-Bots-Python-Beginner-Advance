@@ -1,45 +1,45 @@
-# Controlled Production Execution Platform — User Manual
+# CONTROLLED PRODUCTION EXECUTION PLATFORM — USER MANUAL
+
+## Phase 3 — Solana Devnet Execution & Evidence Package
+
+Repository: ZManev/Cryptocurrency-Trading-Bots-Python-Beginner-Advance  
+Branch: phase-3/solana-devnet-e2e
 
 ## 1. Purpose
 
-This package provides the deployable Phase 3 foundation for a controlled crypto execution platform.
+This package provides the deployable foundation for a controlled crypto execution platform.
 
-The verified design boundary is:
+Evidence boundary:
 
 Strategy / AI
 → OrderIntent
 → RiskApproval
-→ ExecutionRequest / Execution Gate
+→ Execution Gate
 → Solana / Raydium adapter
 → real on-chain transaction
 → observed fill / balance delta
 → PostgreSQL
 → reconciliation
-→ audit evidence.
+→ audit evidence
 
-**Important:** Phase 3 is Devnet execution infrastructure. It is not a declaration that a successful real-money Mainnet execution has been completed.
+**Important:** Phase 3 is Devnet execution infrastructure. It is not a declaration that successful real-money Mainnet execution has been completed.
 
-## 2. Repository deployment
-
-Branch:
-
-`phase-3/solana-devnet-e2e`
-
-Core directories:
+## 2. Deployment package
 
 ```text
 phase3/
-  contracts/
-  database/
-  solana-devnet/
+├── contracts/
+├── database/
+└── solana-devnet/
 
 deploy/
-  .env.example
-  README.md
-  compose/docker-compose.yml
+├── .env.example
+├── README.md
+└── compose/
+    └── docker-compose.yml
 
 .github/workflows/
-  python-package-conda.yml
+└── python-package-conda.yml
 ```
 
 ## 3. Prerequisites
@@ -47,15 +47,15 @@ deploy/
 - Git
 - Docker + Docker Compose
 - Node.js 20+
-- PostgreSQL 16 (provided by Compose)
-- A dedicated Solana Devnet RPC endpoint for CI/local E2E
-- A currently liquid Raydium Devnet output mint
+- PostgreSQL 16 via Compose
+- Dedicated Solana Devnet RPC for CI/local E2E
+- Currently supported/liquid Raydium Devnet output mint
 
-Do not put private keys in Git, GitHub Actions variables, frontend code, strategy code, or this repository.
+Never commit private keys to Git, GitHub Actions variables, frontend code, strategy code, or this repository.
 
 ## 4. Local deployment
 
-From the repository root:
+From repository root:
 
 ```bash
 cp deploy/.env.example deploy/.env
@@ -75,30 +75,29 @@ Start PostgreSQL:
 docker compose --env-file deploy/.env -f deploy/compose/docker-compose.yml up -d postgres
 ```
 
-Run the real Devnet E2E profile:
+Run the real Devnet E2E:
 
 ```bash
 docker compose --env-file deploy/.env -f deploy/compose/docker-compose.yml --profile e2e run --rm solana-devnet-e2e
 ```
 
-## 5. GitHub Actions deployment
+## 5. GitHub Actions
 
-Repository secret:
+Configure repository secret:
 
 ```text
 SOLANA_RPC_URL
 ```
 
-The workflow initializes PostgreSQL, installs the E2E harness, executes the Raydium Devnet flow and writes the ledger evidence.
+The workflow initializes PostgreSQL, installs the E2E harness, executes the Raydium Devnet flow, and records ledger evidence.
 
-Trigger:
-
-- push to `phase-3/solana-devnet-e2e`
-- manual `workflow_dispatch`
+Triggers:
+- push to phase-3/solana-devnet-e2e
+- manual workflow_dispatch
 
 ## 6. Database
 
-The PostgreSQL schema contains the execution evidence chain:
+The PostgreSQL schema contains:
 
 - accounts
 - order_intents
@@ -110,11 +109,9 @@ The PostgreSQL schema contains the execution evidence chain:
 - idempotency_keys
 - kill_switch_state
 
-PostgreSQL is the canonical application ledger. It does not replace the venue/blockchain as the source of execution truth.
+PostgreSQL is the canonical application ledger. The blockchain/exchange remains the source of execution truth.
 
 ## 7. Production Execution Proof
-
-The proof chain is:
 
 ```text
 funding_signature
@@ -132,22 +129,20 @@ audit_event_id
 PRODUCTION_EXECUTION_PROOF = PASS
 ```
 
-PASS must be derived from evidence.
-
-Required conditions:
+PASS must be derived from evidence:
 
 1. Funding transaction verified.
 2. Real transaction exists on the target venue.
-3. Transaction is confirmed/finalized according to the configured settlement policy.
+3. Transaction meets the configured confirmation/finality policy.
 4. Observed output balance delta is positive.
 5. PostgreSQL fill exists.
 6. Fill references the same transaction signature.
-7. Reconciliation status is `RECONCILED`.
-8. Audit event exists with the execution correlation chain.
+7. Reconciliation status is RECONCILED.
+8. Audit evidence exists with the correlation chain.
 
 A CI-green workflow alone is not execution proof.
 
-## 8. Solana transaction lifecycle
+## 8. Transaction lifecycle
 
 ```text
 CREATED
@@ -171,13 +166,11 @@ RECONCILED
 AUDITED
 ```
 
-For Mainnet, use a production RPC rather than the public endpoint, use fresh blockhashes, track `lastValidBlockHeight`, and rebuild/re-sign a transaction when its blockhash expires. For audit evidence, record finalized state where the settlement policy requires it.
+For Mainnet, use production RPC, fresh blockhashes, and track blockhash validity. If a blockhash expires, rebuild and re-sign the transaction instead of blindly retrying the old signed transaction.
 
-## 9. Safety boundary
+## 9. Security boundary
 
 AI, strategy code, UI and notification channels must not receive unrestricted private-key access.
-
-The intended production boundary is:
 
 ```text
 AI / Strategy
@@ -197,9 +190,9 @@ Venue
 
 Capability is not authority.
 
-## 10. Kill switches
+## 10. Kill switches and idempotency
 
-Production control must support independent switches for:
+Production control should support:
 
 - SYSTEM
 - ACCOUNT
@@ -209,15 +202,9 @@ Production control must support independent switches for:
 
 An active kill switch blocks execution at the gate.
 
-## 11. Idempotency
+Every execution request must carry an idempotency key. Duplicate requests must not create duplicate financial actions.
 
-Every execution request must carry an idempotency key.
-
-Duplicate requests must not create duplicate financial actions.
-
-The database schema includes a unique idempotency record to support this boundary.
-
-## 12. Troubleshooting
+## 11. Troubleshooting
 
 ### SOLANA_RPC_URL missing
 
@@ -225,21 +212,21 @@ The real DEX E2E intentionally fails. Configure a dedicated Devnet RPC.
 
 ### Faucet / funding rate limited
 
-Do not interpret a faucet HTTP success/failure as an execution proof. Use a funded Devnet account and verify the funding signature and resulting balance.
+Do not interpret faucet availability as execution proof. Verify the funding signature and funded balance.
 
 ### Blockhash expired
 
-Do not blindly retry an old signed transaction. Rebuild the transaction with a fresh blockhash, sign again, submit, and reconcile the resulting signature.
+Rebuild the transaction with a fresh blockhash, sign again, submit, and reconcile the new transaction signature.
 
 ### Raydium quote unavailable
 
-Verify the Devnet output mint is currently supported/liquid and that the configured RPC can reach the required Solana accounts.
+Verify the Devnet output mint is currently supported/liquid and that the configured RPC can reach required Solana accounts.
 
 ### PostgreSQL reconciliation missing
 
-Check that the schema was initialized and that the E2E process reached the ledger-write stage. A transaction without a matching fill and reconciliation record is not a PASS.
+Verify schema initialization and that the E2E process reached the ledger-write stage. A transaction without matching fill and reconciliation evidence is not PASS.
 
-## 13. Evidence record
+## 12. Evidence record
 
 A production-grade evidence record should contain:
 
@@ -258,11 +245,13 @@ finality
 verified_at
 ```
 
-## 14. Current acceptance status
+## 13. Current acceptance status
 
 The repository contains the deployable Devnet E2E package and CI integration.
 
-At the time this manual is generated, the previously observed CI runs had not produced a verified successful real Raydium Devnet execution with complete PostgreSQL reconciliation evidence. Therefore:
+Previously observed CI runs had not produced a verified successful real Raydium Devnet execution with complete PostgreSQL reconciliation evidence.
+
+Therefore:
 
 ```text
 PRODUCTION_EXECUTION_PROOF = NOT VERIFIED
@@ -270,14 +259,14 @@ PRODUCTION_EXECUTION_PROOF = NOT VERIFIED
 
 Do not change this status to PASS manually.
 
-## 15. Mainnet transition
+## 14. Mainnet transition
 
-Mainnet requires a separate production configuration and controls:
+Mainnet requires separate production configuration and controls:
 
 - production RPC
-- secure signing service / KMS / HSM / Vault boundary
+- isolated signing service / KMS / HSM / Vault boundary
 - real SOL fee funding
-- mainnet token/program addresses
+- mainnet program/token addresses
 - execution risk limits
 - kill switches
 - transaction monitoring
@@ -288,8 +277,22 @@ Mainnet requires a separate production configuration and controls:
 
 Devnet and Mainnet credentials, mints and configuration must remain separated.
 
-## 16. References
+## 15. Reference evidence chain
 
-- Solana Production Readiness: https://solana.com/docs/tools/production-readiness
-- Solana Transaction Confirmation & Expiration: https://solana.com/developers/cookbook/transactions/confirmation
-- Solana getTransaction RPC: https://solana.com/docs/rpc/http/gettransaction
+```text
+REAL VENUE
+    ↓
+REAL TRANSACTION
+    ↓
+REAL FILL / BALANCE DELTA
+    ↓
+RECONCILIATION
+    ↓
+POSTGRES
+    ↓
+AUDIT
+    ↓
+PRODUCTION_EXECUTION_PROOF
+```
+
+Operational rule: a green CI build is not financial execution proof. Production proof must originate from real venue state and be independently reconciled into the canonical ledger.
