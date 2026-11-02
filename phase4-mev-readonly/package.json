@@ -1,0 +1,19 @@
+{
+  "name": "solana-mainnet-mev-readonly",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "probe": "tsx src/main.ts"
+  },
+  "dependencies": {
+    "@solana/web3.js": "1.98.4"
+  },
+  "devDependencies": {
+    "@types/node": "22.15.3",
+    "tsx": "4.19.2",
+    "typescript": "5.8.3"
+  }
+}
