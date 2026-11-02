@@ -1,0 +1,35 @@
+name: Solana Mainnet MEV Read-Only
+
+on:
+  push:
+    branches:
+      - feature/solana-mainnet-mev-readonly
+    paths:
+      - "phase4-mev-readonly/**"
+      - ".github/workflows/solana-mev-readonly.yml"
+  pull_request:
+    paths:
+      - "phase4-mev-readonly/**"
+      - ".github/workflows/solana-mev-readonly.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-readonly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: phase4-mev-readonly
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: phase4-mev-readonly/package-lock.json
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: npm test
+      - run: npm run build
