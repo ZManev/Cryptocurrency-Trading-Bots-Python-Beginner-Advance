@@ -101,22 +101,14 @@ async function main(): Promise<void> {
         reject(new Error("NO_SLOT_EVENT_WITHIN_TIMEOUT"));
       }, 10_000);
 
-      connection.onSlotChange(async (event) => {
+      subscriptionId = connection.onSlotChange((event) => {
         if (settled) return;
         settled = true;
         clearTimeout(timer);
         if (subscriptionId !== undefined) {
-          try { await connection.removeSlotChangeListener(subscriptionId); } catch {}
+          void connection.removeSlotChangeListener(subscriptionId).catch(() => undefined);
         }
         resolve({ slot: event.slot, parent: event.parent, root: event.root });
-      }).then((id) => {
-        subscriptionId = id;
-      }).catch((error) => {
-        clearTimeout(timer);
-        if (!settled) {
-          settled = true;
-          reject(error);
-        }
       });
     });
   });
@@ -198,7 +190,7 @@ async function main(): Promise<void> {
   }, null, 2));
 
   if (failed > 0) process.exitCode = 1;
-  await connection.removeAllSlotChangeListeners();
+  // The slot subscription is removed after the first observed event.
 }
 
 main().catch((error) => {
