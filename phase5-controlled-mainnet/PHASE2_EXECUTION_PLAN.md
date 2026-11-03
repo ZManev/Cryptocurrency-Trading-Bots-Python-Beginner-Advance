@@ -55,9 +55,9 @@ Enabling the Mainnet transaction path requires all relevant flags to be explicit
 
 ## 5. Mandatory risk controls
 
-No default capital amount is assumed. The operator must configure and approve explicit numeric limits before any live transaction:
+Initial operator-approved cap: **0.01 SOL maximum total wallet debit per first Mainnet transaction** (10,000,000 lamports). This is a hard ceiling, not a spending target. Count swap input, base fee, priority fee, Jito tip (if ever separately enabled), and any rent/account-creation debit toward this ceiling. The wallet must also retain a separately configured minimum SOL reserve after the transaction. If the complete debit cannot be bounded and verified before signing, reject the transaction. No default capital amount is otherwise assumed. The operator must configure and approve explicit numeric limits before any live transaction:
 
-- Maximum input amount and notional per trade
+- Maximum total SOL wallet debit per first trade: 10,000,000 lamports (0.01 SOL); maximum input amount and notional per trade
 - Maximum cumulative daily notional
 - Maximum daily realized and unrealized loss
 - Maximum slippage and price impact
@@ -109,6 +109,6 @@ No gate is marked PASS without retained evidence tied to a commit SHA. Mainnet s
 
 ## 9. First live transaction protocol
 
-Before the first broadcast, present a human-readable transaction preview including cluster, wallet public key, input/output mints, exact raw and decimal amounts, quote, minimum output, price impact, slippage, program IDs, instruction summary, estimated fees, signer, message hash, expiry, and all active limits. Require a fresh explicit approval for that exact preview. Any changed message requires a new approval.
+For the first Mainnet transaction, enforce the 10,000,000-lamport total-debit cap including all network and execution costs. Before the first broadcast, present a human-readable transaction preview including cluster, wallet public key, input/output mints, exact raw and decimal amounts, quote, minimum output, price impact, slippage, program IDs, instruction summary, estimated fees, signer, message hash, expiry, and all active limits. Require a fresh explicit approval for that exact preview. Any changed message requires a new approval.
 
 The first Mainnet operation must be one bounded transaction, not a strategy loop. After confirmation, reconcile and stop. No automatic second trade.
