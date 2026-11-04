@@ -49,3 +49,14 @@ npm run dev
 - Add persistence, replayable event log, metrics and alert delivery.
 - Add integration tests using fixtures and mocks before any external network probes.
 - Require independent security review and explicit approvals before considering any execution capability.
+
+
+## Dashboard API
+
+- `GET /api/status` — hard-lock state and mode.
+- `GET /api/solana/health` — bounded HTTP RPC and WebSocket slot health checks.
+- `GET /api/solana/raydium/pools` — Raydium pool metadata, defaulting to wrapped SOL mint.
+- `GET /api/solana/jito/diagnostics` — Jito `getTipAccounts` only.
+- `POST /api/*` — denied with HTTP 403. No write endpoint exists.
+
+The UI intentionally displays provider connectivity separately from execution authority. Raydium metadata discovery is not a swap quote, Jito tip-account discovery is not bundle submission, and a successful RPC health check is not evidence of profitable execution.
