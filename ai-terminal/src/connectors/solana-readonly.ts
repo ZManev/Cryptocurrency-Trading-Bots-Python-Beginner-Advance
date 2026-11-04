@@ -54,7 +54,7 @@ export async function checkSolanaRpc(config: ReadOnlySolanaConfig): Promise<RpcH
       rpcCall<number>(config.rpcUrl, "getBlockHeight", [{ commitment: "confirmed" }], fetcher, timeout),
       rpcCall<{ "solana-core"?: string }>(config.rpcUrl, "getVersion", [], fetcher, timeout)
     ]);
-    return { status: "PASS", endpoint: safeEndpoint(config.rpcUrl), slot, blockHeight, version: version["solana-core"], latencyMs: Date.now() - started, checkedAt: new Date().toISOString() };
+    return { status: "PASS", endpoint: safeEndpoint(config.rpcUrl), slot, blockHeight, ...(version["solana-core"] ? { version: version["solana-core"] } : {}), latencyMs: Date.now() - started, checkedAt: new Date().toISOString() };
   } catch (error) {
     return { status: "FAIL", endpoint: safeEndpoint(config.rpcUrl), latencyMs: Date.now() - started, checkedAt: new Date().toISOString(), error: error instanceof Error ? error.message : "RPC_FAILED" };
   }
@@ -126,7 +126,7 @@ export async function discoverRaydiumPools(mint: string, options: { fetcher?: ty
     if (!poolId || !mintA || !mintB) return [];
     const num = (v: unknown) => { const n = typeof v === "number" ? v : typeof v === "string" ? Number(v) : NaN; return Number.isFinite(n) ? n : undefined; };
     const day = row.day && typeof row.day === "object" ? row.day as Record<string, unknown> : {};
-    return [{ poolId, mintA, mintB, liquidityUsd: num(row.tvl) ?? num(row.liquidity), volume24hUsd: num(day.volume) ?? num(row.volume24h) }];
+    const liquidityUsd = num(row.tvl) ?? num(row.liquidity);\n    const volume24hUsd = num(day.volume) ?? num(row.volume24h);\n    return [{ poolId, mintA, mintB, ...(liquidityUsd !== undefined ? { liquidityUsd } : {}), ...(volume24hUsd !== undefined ? { volume24hUsd } : {}) }];
   });
 }
 
