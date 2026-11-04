@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Trading Terminal · Solana Read-Only</title>
+<style>
+:root{color-scheme:dark;--bg:#070b14;--panel:#0d1422;--line:#253249;--muted:#8492a9;--text:#e6edf8;--cyan:#50d9ce;--purple:#a78bfa;--green:#5be0a0;--red:#fb7185;--amber:#fbbf24}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 18% 0%,#16233d 0,transparent 42%),var(--bg);color:var(--text);font:14px Inter,ui-sans-serif,system-ui,sans-serif}
+.shell{max-width:1500px;margin:auto;padding:22px}.top{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:18px}.brand{display:flex;align-items:center;gap:14px}.orb{width:48px;height:48px;border-radius:50%;background:linear-gradient(140deg,#fff,#a78bfa 65%,#5838b9);box-shadow:0 0 34px #9878ff55;display:grid;place-items:center;color:#1a1730;font-size:22px;font-weight:900}.eyebrow{color:var(--muted);font-size:10px;letter-spacing:2px;text-transform:uppercase}.title{font-size:22px;font-weight:800;letter-spacing:.3px}.sub{color:var(--muted);font-size:11px;margin-top:4px}.lock{border:1px solid #65404b;color:#ff9aaa;background:#351c2a;padding:8px 12px;border-radius:8px;font-weight:800;font-size:11px;letter-spacing:1px}
+.grid{display:grid;grid-template-columns:250px minmax(0,1fr);gap:14px}.stack{display:grid;gap:12px;align-content:start}.panel{background:linear-gradient(150deg,#111b2c,#0b1220);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:0 12px 35px #0003}.agent{min-height:90px}.agent h3{font-size:12px;margin:0 0 7px;letter-spacing:1px}.agent p{font-size:11px;color:var(--muted);margin:0;line-height:1.5}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:6px}.dot.warn{background:var(--amber)}.dot.fail{background:var(--red)}.badge{font-size:9px;border:1px solid var(--line);border-radius:6px;padding:3px 6px;color:var(--cyan);float:right}
+.main{display:grid;gap:12px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.metric .value{font-size:25px;font-weight:800;margin-top:9px}.metric .label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.cols{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}.section-title{font-size:11px;letter-spacing:1.5px;color:#b6c5db;font-weight:800;margin-bottom:13px}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #1e2a3d;font-size:11px}.row:last-child{border:0}.muted{color:var(--muted)}.good{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--amber)}
+.score{font-size:38px;color:var(--cyan);font-weight:900}.bar{height:5px;background:#263249;border-radius:8px;overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;background:linear-gradient(90deg,#7c6cf5,var(--cyan));width:0}
+.pipeline{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.node{border:1px solid #293750;border-radius:9px;padding:12px 7px;text-align:center}.node b{display:block;font-size:10px;letter-spacing:.6px}.node small{color:var(--muted);font-size:9px}.node .symbol{font-size:18px;margin-bottom:7px;color:var(--cyan)}
+table{width:100%;border-collapse:collapse;font-size:10px}th,td{text-align:left;padding:9px 7px;border-bottom:1px solid #1e2a3d}th{color:var(--muted);font-weight:600}.footer{margin-top:14px;color:#718098;font-size:10px;display:flex;justify-content:space-between;gap:12px}.btn{border:1px solid #35546a;background:#122537;color:#b9f6ee;border-radius:7px;padding:8px 10px;font-size:10px;cursor:pointer}.btn:hover{background:#19394b}.log{font:10px ui-monospace,monospace;line-height:1.8;color:#9fb0c7;max-height:150px;overflow:auto}.log span{color:var(--cyan)}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.stack{grid-template-columns:repeat(2,1fr)}.metrics{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.shell{padding:12px}.cols{grid-template-columns:1fr}.pipeline{grid-template-columns:repeat(3,1fr)}.top{align-items:flex-start;flex-direction:column}}
+</style></head>
+<body><div class="shell">
+<header class="top"><div class="brand"><div class="orb">Ⅱ</div><div><div class="eyebrow">Autonomous research · hard handoffs</div><div class="title">AI Trading Terminal <span style="color:var(--cyan)">/ Solana</span></div><div class="sub"><span class="dot warn"></span><span id="runstate">connecting to read-only services…</span></div></div></div><div class="lock">● PAPER / READ-ONLY · EXECUTION LOCKED</div></header>
+<div class="grid"><aside class="stack">
+<div class="panel agent"><span class="badge">SCAN</span><h3>⌕ SCOUT</h3><p>Discovers market pairs and protocol activity from public data sources.</p></div>
+<div class="panel agent"><span class="badge">CHECK</span><h3>▽ FILTER</h3><p>Applies deterministic liquidity, volume, spread and authority checks.</p></div>
+<div class="panel agent"><span class="badge">IDLE</span><h3>▥ ANALYST</h3><p>Scores opportunities. No trade recommendation is execution authority.</p></div>
+<div class="panel agent"><span class="badge">LOCKED</span><h3>ϟ EXECUTOR</h3><p>Paper intents only. No wallet, signer, order or submission interface.</p></div>
+<div class="panel agent"><span class="badge">ARMED</span><h3>⬡ RISK</h3><p>Fail-closed controls, notional limits and independent kill switch.</p></div>
+<div class="panel agent"><span class="badge">WRITE</span><h3>▤ LOGGER</h3><p>Auditable health checks, agent decisions and integration events.</p></div>
+</aside>
+<main class="main">
+<section class="metrics">
+<div class="panel metric"><div class="label">Solana RPC slot</div><div class="value" id="slot">—</div><div class="sub" id="rpcLatency">not verified</div></div>
+<div class="panel metric"><div class="label">Block height</div><div class="value" id="height">—</div><div class="sub">confirmed commitment</div></div>
+<div class="panel metric"><div class="label">Raydium pools</div><div class="value" id="poolCount">—</div><div class="sub">metadata discovery only</div></div>
+<div class="panel metric"><div class="label">Jito tip accounts</div><div class="value" id="jitoCount">—</div><div class="sub" id="jitoState">diagnostics pending</div></div>
+</section>
+<section class="panel"><div class="section-title">LIVE FLOW · SIX AGENTS · HARD HANDOFFS</div><div class="pipeline">
+<div class="node"><div class="symbol">⌕</div><b>SCOUT</b><small>discover</small></div><div class="node"><div class="symbol">▽</div><b>FILTER</b><small>validate</small></div><div class="node"><div class="symbol">▥</div><b>ANALYST</b><small>score</small></div><div class="node"><div class="symbol">ϟ</div><b>EXECUTOR</b><small>paper only</small></div><div class="node"><div class="symbol">⬡</div><b>RISK</b><small>authority</small></div><div class="node"><div class="symbol">▤</div><b>LOGGER</b><small>audit</small></div>
+</div></section>
+<div class="cols">
+<section class="panel"><div class="section-title">SOLANA MAINNET · READ-ONLY CONNECTIVITY</div>
+<div class="row"><span>HTTP JSON-RPC</span><strong id="rpcStatus" class="warn">NOT VERIFIED</strong></div>
+<div class="row"><span>WebSocket slot subscription</span><strong id="wsStatus" class="warn">NOT VERIFIED</strong></div>
+<div class="row"><span>Jito read-only diagnostics</span><strong id="jitoStatus" class="warn">NOT VERIFIED</strong></div>
+<div class="row"><span>Raydium pool metadata</span><strong id="rayStatus" class="warn">NOT VERIFIED</strong></div>
+<div class="row"><span>Signing capability</span><strong class="bad">DISABLED</strong></div>
+<div class="row"><span>Transaction submission</span><strong class="bad">DISABLED</strong></div>
+<div class="row"><span>Live trading</span><strong class="bad">DISABLED</strong></div>
+<div class="sub" style="margin-top:12px">Endpoint secrets are never rendered in the browser or API responses.</div>
+</section>
+<section class="panel"><div class="section-title">RISK ENGINE · AUTHORITY</div><div style="display:flex;align-items:center;justify-content:space-between"><div><div class="eyebrow">Execution permission</div><div style="font-weight:800;color:var(--red);font-size:19px;margin-top:8px">LOCKED</div></div><div class="score">0</div></div>
+<div class="row"><span>Paper mode</span><strong class="good">AVAILABLE</strong></div><div class="row"><span>Kill switch</span><strong class="bad">ACTIVE</strong></div><div class="row"><span>Signing gate</span><strong class="bad">CLOSED</strong></div><div class="row"><span>Submission gate</span><strong class="bad">CLOSED</strong></div><button class="btn" disabled title="Requires separate approval and audited release">Execution controls · approval required</button>
+</section></div>
+<section class="panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div class="section-title">RAYDIUM · DISCOVERED POOL METADATA</div><button class="btn" id="refresh">Refresh data</button></div>
+<div style="overflow:auto"><table><thead><tr><th>POOL</th><th>TOKEN A</th><th>TOKEN B</th><th>LIQUIDITY USD</th><th>24H VOLUME</th></tr></thead><tbody id="pools"><tr><td colspan="5" class="muted">Awaiting read-only discovery…</td></tr></tbody></table></div></section>
+<section class="panel"><div class="section-title">LOGGER · SYSTEM EVENTS</div><div class="log" id="logs"><div>• Dashboard initialized · execution locked</div><div>• Awaiting Solana Mainnet read-only checks</div></div></section>
+</main></div>
+<div class="footer"><span>AI MULTI-AGENT TERMINAL · DEVELOPMENT FOUNDATION</span><span id="updated">No live checks completed</span></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const stamp=()=>new Date().toLocaleTimeString();
+function log(msg){const el=$("logs"),row=document.createElement("div");row.innerHTML='<span>['+stamp()+']</span> '+msg;el.prepend(row);while(el.children.length>30)el.lastChild.remove()}
+function state(id,value){const el=$(id);el.textContent=value;el.className=value==="PASS"?"good":value==="FAIL"?"bad":"warn"}
+async function get(path){const r=await fetch(path,{cache:"no-store"});if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}
+async function health(){try{const d=await get("/api/solana/health");state("rpcStatus",d.rpc.status);state("wsStatus",d.websocket.status);$("slot").textContent=d.rpc.slot?.toLocaleString()??"—";$("height").textContent=d.rpc.blockHeight?.toLocaleString()??"—";$("rpcLatency").textContent=d.rpc.latencyMs!=null?d.rpc.latencyMs+" ms":"RPC unavailable";$("runstate").textContent="read-only monitoring active";log("Solana RPC "+d.rpc.status+" · WebSocket "+d.websocket.status);if(d.websocket.observedSlot)$("slot").textContent=d.websocket.observedSlot.toLocaleString()}catch(e){state("rpcStatus","NOT VERIFIED");$("runstate").textContent="read-only services unavailable";log("Health check: "+e.message)}}
+async function pools(){try{const d=await get("/api/solana/raydium/pools");state("rayStatus",d.status);$("poolCount").textContent=d.pools.length;$("pools").replaceChildren();for(const p of d.pools.slice(0,12)){const tr=document.createElement("tr");[p.poolId.slice(0,9)+"…",p.mintA.slice(0,7)+"…",p.mintB.slice(0,7)+"…",p.liquidityUsd?.toLocaleString()??"—",p.volume24hUsd?.toLocaleString()??"—"].forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.append(td)});$("pools").append(tr)}if(!d.pools.length)$("pools").innerHTML='<tr><td colspan="5" class="muted">No pools returned by provider</td></tr>';log("Raydium metadata: "+d.pools.length+" pools")}catch(e){state("rayStatus","NOT VERIFIED");log("Raydium check: "+e.message)}}
+async function jito(){try{const d=await get("/api/solana/jito/diagnostics");state("jitoStatus",d.status);$("jitoCount").textContent=d.tipAccounts??"—";$("jitoState").textContent=d.status==="PASS"?"read-only method responded":"not verified";log("Jito diagnostics "+d.status)}catch(e){state("jitoStatus","NOT VERIFIED");log("Jito check: "+e.message)}}
+async function refresh(){await Promise.all([health(),pools(),jito()]);$("updated").textContent="Updated "+stamp()}
+$("refresh").addEventListener("click",refresh);refresh();setInterval(health,30000);
+</script></body></html>
