@@ -7,7 +7,8 @@
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "dev": "tsx src/demo.ts"
+    "dev": "tsx src/demo.ts",
+    "dashboard": "tsx src/server.ts"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
