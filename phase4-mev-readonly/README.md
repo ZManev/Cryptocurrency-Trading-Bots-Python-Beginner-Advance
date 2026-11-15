@@ -1,49 +1,43 @@
-# Solana Mainnet MEV — Read-Only Foundation
+# Solana Mainnet MEV — Read-Only Foundation + Phase 2 Scaffold
 
-This package implements Phase 1 diagnostics only. It reads Solana Mainnet state, subscribes to slot updates, requests a Raydium quote, and calls Jito's read-only `getTipAccounts` method.
+Phase 1 provides read-only Solana Mainnet diagnostics: RPC health/genesis/slot/account reads, a WebSocket slot event, Raydium quote, and Jito `getTipAccounts`.
+
+Phase 2 adds **non-executing architecture scaffolding** for strategy candidates, risk evaluation, simulation assessment, an execution gate, and an HSM signer contract.
 
 ## Safety boundary
 
-- No wallet or private key is loaded.
-- No transaction is constructed, signed, simulated, or submitted.
-- No Jito bundle is constructed or submitted.
-- The Jito adapter allowlists only `getTipAccounts`.
-- The Solana RPC adapter allowlists read-only methods.
-- The application fails closed unless all execution flags are explicitly `false`.
+- No wallet private key is loaded or stored by this application.
+- No concrete HSM provider adapter is implemented yet; `HsmSigner` is an interface contract only.
+- No transaction submission or Jito bundle submission adapter is implemented.
+- The execution gate is a policy evaluator, not a transaction sender.
+- Phase 1 remains read-only and requires all execution flags to be explicitly `false`.
+- Phase 2 modules do not override Phase 1's read-only startup guard.
+- Do not put API keys, HSM credentials, or private keys in source control or chat.
 
-The inherited Devnet execution harness is intentionally not imported by this package.
-
-## Setup
+## Setup and checks
 
 ```bash
 cd phase4-mev-readonly
 npm install
 cp .env.example .env
-```
-
-Set `SOLANA_RPC_URL` and `SOLANA_WS_URL` to a dedicated Mainnet RPC provider. Do not use a shared public RPC for sustained or latency-sensitive workloads.
-
-## Local checks
-
-```bash
 npm test
 npm run build
 npm run probe
 ```
 
-The probe makes read-only network requests. It emits JSON with per-check PASS/FAIL results. A successful RPC health check alone does not prove provider suitability or MEV profitability.
+Use a dedicated Mainnet RPC provider for sustained workloads. The probe performs read-only requests only. A PASS requires captured, timestamped output from the actual probe; configuration alone is not evidence.
 
-## Phase boundaries
+## Phase 2 modules
 
-Phase 1: Mainnet read-only RPC, WebSocket, Raydium quote, Jito diagnostics.
+- `src/phase2/types.ts`: typed candidate, simulation, risk, and authorization contracts.
+- `src/phase2/risk-engine.ts`: fee + Jito tip debit cap, slippage, input amount, and program allowlist checks.
+- `src/phase2/simulation.ts`: adapter-driven balance, fee, and simulation assessment.
+- `src/phase2/hsm-signer.ts`: HSM signer interface and response identity checks; no key material handling or provider implementation.
+- `src/phase2/execution-gate.ts`: fail-closed gate requiring verified Phase 1 evidence, live controls, kill-switch release, independent approval ID, and candidate binding.
 
-Phase 2: pool discovery, route graph, arbitrage candidate generation and fee-aware profitability analysis. No execution.
+## Not implemented / not authorized
 
-Phase 3: Jito searcher client research and offline/local bundle construction/simulation only. Submission methods remain absent and blocked.
-
-Phase 4: optional validator-side BAM integration. Requires a separately operated validator with upcoming leader slots; it is not required for the searcher.
-
-Phase 5: security, replay, latency, P&L attribution and reconciliation audit.
+Real HSM signing, transaction submission, Jito bundle submission, live trading, production secrets, and live activation are **not implemented or enabled**. The 0.01 SOL maximum total-debit policy must be enforced by a production policy configuration and independently tested before any live use. No transaction should be sent from this branch.
 
 ## Evidence
 
