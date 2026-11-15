@@ -5,6 +5,8 @@ export interface TradeCandidate {
   inputMint: string;
   outputMint: string;
   inputAmount: bigint;
+  /** Native SOL portion of the input, normalized to lamports. */
+  nativeInputDebitLamports: bigint;
   expectedOutputAmount: bigint;
   minimumOutputAmount: bigint;
   maxSlippageBps: number;
