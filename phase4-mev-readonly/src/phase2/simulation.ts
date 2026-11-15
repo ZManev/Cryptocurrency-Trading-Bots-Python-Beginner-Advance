@@ -39,10 +39,10 @@ export async function assessSimulation(
   if (estimatedFee > policy.maxFeeLamports || simulation.feeLamports > policy.maxFeeLamports) {
     reasons.push("NETWORK_FEE_LIMIT_EXCEEDED");
   }
-  if (estimatedFee + candidate.jitoTipLamports > policy.maxTotalDebitLamports ||
-      simulation.feeLamports + candidate.jitoTipLamports > policy.maxTotalDebitLamports) {
-    reasons.push("TOTAL_DEBIT_LIMIT_EXCEEDED");
-  }
+  const estimatedTotalDebit = candidate.nativeInputDebitLamports + estimatedFee + candidate.jitoTipLamports;
+  const simulatedTotalDebit = candidate.nativeInputDebitLamports + simulation.feeLamports + candidate.jitoTipLamports;
+  if (estimatedTotalDebit > policy.maxTotalDebitLamports ||
+      simulatedTotalDebit > policy.maxTotalDebitLamports) reasons.push("TOTAL_DEBIT_LIMIT_EXCEEDED");
   if (!Number.isSafeInteger(simulation.postSimulationSlot) || simulation.postSimulationSlot <= 0) {
     reasons.push("SIMULATION_SLOT_INVALID");
   }
