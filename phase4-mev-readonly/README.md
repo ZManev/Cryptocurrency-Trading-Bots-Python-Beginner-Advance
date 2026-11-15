@@ -29,15 +29,17 @@ Use a dedicated Mainnet RPC provider for sustained workloads. The probe performs
 
 ## Phase 2 modules
 
+- `src/phase2/strategy.ts`: strategy contract creates candidate proposals only.
+- `src/phase2/solana-adapter.ts`: read-only Solana RPC and Jito adapter contracts; no send methods.
 - `src/phase2/types.ts`: typed candidate, simulation, risk, and authorization contracts.
-- `src/phase2/risk-engine.ts`: fee + Jito tip debit cap, slippage, input amount, and program allowlist checks.
+- `src/phase2/risk-engine.ts`: native input debit + network fee + Jito tip cap, slippage, input amount, and program allowlist checks.
 - `src/phase2/simulation.ts`: adapter-driven balance, fee, and simulation assessment.
 - `src/phase2/hsm-signer.ts`: HSM signer interface and response identity checks; no key material handling or provider implementation.
 - `src/phase2/execution-gate.ts`: fail-closed gate requiring verified Phase 1 evidence, live controls, kill-switch release, independent approval ID, and candidate binding.
 
 ## Not implemented / not authorized
 
-Real HSM signing, transaction submission, Jito bundle submission, live trading, production secrets, and live activation are **not implemented or enabled**. The 0.01 SOL maximum total-debit policy must be enforced by a production policy configuration and independently tested before any live use. No transaction should be sent from this branch.
+Real HSM signing, transaction submission, Jito bundle submission, live trading, production secrets, and live activation are **not implemented or enabled**. The 0.01 SOL maximum total-debit policy must be enforced by a production policy configuration and independently tested before any live use. Current native debit accounting is scaffolding; full token/native instruction decoding and balance-delta verification remain required. No transaction should be sent from this branch.
 
 ## Evidence
 
