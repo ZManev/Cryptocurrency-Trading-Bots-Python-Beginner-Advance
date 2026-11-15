@@ -6,7 +6,10 @@ export class ScoutAgent {
       Number.isFinite(c.liquidityUsd) &&
       Number.isFinite(c.volume24hUsd) &&
       c.liquidityUsd >= 0 &&
-      c.volume24hUsd >= 0
+      c.volume24hUsd >= 0 &&
+      Number.isFinite(c.holderConcentrationPct) &&
+      c.holderConcentrationPct >= 0 && c.holderConcentrationPct <= 100 &&
+      Number.isFinite(c.spreadBps) && c.spreadBps >= 0
     );
   }
 }
@@ -20,7 +23,17 @@ export interface FilterPolicy {
 }
 
 export class FilterAgent {
-  constructor(private readonly policy: FilterPolicy) {}
+  private readonly policy: FilterPolicy;
+
+  constructor(policy: FilterPolicy) {
+    for (const key of ["minLiquidityUsd", "minVolume24hUsd", "maxHolderConcentrationPct", "maxSpreadBps"] as const) {
+      const value = policy[key];
+      if (!Number.isFinite(value) || value < 0 || (key === "maxHolderConcentrationPct" && value > 100)) {
+        throw new Error(`Invalid filter threshold: ${key}`);
+      }
+    }
+    this.policy = { ...policy };
+  }
 
   evaluate(candidate: Candidate): FilterResult {
     const reasons: string[] = [];

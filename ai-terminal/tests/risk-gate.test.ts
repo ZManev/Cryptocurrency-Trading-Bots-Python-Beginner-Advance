@@ -9,6 +9,25 @@ const intent: TradeIntent = {
 };
 
 describe("RiskEngine", () => {
+  it.each([NaN, Infinity, -Infinity])("rejects non-finite notional %s", (notionalUsd) => {
+    expect(new RiskEngine(defaultRiskPolicy).authorize(analysis, { ...intent, notionalUsd }).approved).toBe(false);
+  });
+
+  it.each([NaN, Infinity, -Infinity, -1, 101])("rejects invalid score %s", (score) => {
+    expect(new RiskEngine(defaultRiskPolicy).authorize({ ...analysis, score }, intent).approved).toBe(false);
+  });
+
+  it.each([NaN, Infinity, -Infinity, -1])("denies invalid policy limit %s", (value) => {
+    for (const key of ["maxNotionalUsd", "minAnalystScore"]) {
+      expect(new RiskEngine({ ...defaultRiskPolicy, [key]: value }).authorize(analysis, intent).approved).toBe(false);
+    }
+  });
+
+  it("denies a score threshold above 100 or a zero notional limit", () => {
+    expect(new RiskEngine({ ...defaultRiskPolicy, minAnalystScore: 101 }).authorize(analysis, intent).approved).toBe(false);
+    expect(new RiskEngine({ ...defaultRiskPolicy, maxNotionalUsd: 0 }).authorize(analysis, intent).approved).toBe(false);
+  });
+
   it("authorizes an in-limit paper intent only", () => {
     const result = new RiskEngine(defaultRiskPolicy).authorize(analysis, intent);
     expect(result.approved).toBe(true);

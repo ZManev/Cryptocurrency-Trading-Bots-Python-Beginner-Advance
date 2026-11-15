@@ -126,7 +126,9 @@ export async function discoverRaydiumPools(mint: string, options: { fetcher?: ty
     if (!poolId || !mintA || !mintB) return [];
     const num = (v: unknown) => { const n = typeof v === "number" ? v : typeof v === "string" ? Number(v) : NaN; return Number.isFinite(n) ? n : undefined; };
     const day = row.day && typeof row.day === "object" ? row.day as Record<string, unknown> : {};
-    const liquidityUsd = num(row.tvl) ?? num(row.liquidity);\n    const volume24hUsd = num(day.volume) ?? num(row.volume24h);\n    return [{ poolId, mintA, mintB, ...(liquidityUsd !== undefined ? { liquidityUsd } : {}), ...(volume24hUsd !== undefined ? { volume24hUsd } : {}) }];
+    const liquidityUsd = num(row.tvl) ?? num(row.liquidity);
+    const volume24hUsd = num(day.volume) ?? num(row.volume24h);
+    return [{ poolId, mintA, mintB, ...(liquidityUsd !== undefined ? { liquidityUsd } : {}), ...(volume24hUsd !== undefined ? { volume24hUsd } : {}) }];
   });
 }
 

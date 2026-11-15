@@ -14,7 +14,13 @@ const send = (res: import("node:http").ServerResponse, status: number, value: un
 };
 
 const server = createServer(async (req, res) => {
-  const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+  let url: URL;
+  try {
+    url = new URL(req.url ?? "/", "http://localhost");
+  } catch {
+    send(res, 400, { error: "invalid_request_url" });
+    return;
+  }
   if (req.method === "GET" && url.pathname === "/") {
     try { res.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" }); res.end(await readFile(htmlPath)); }
     catch { res.writeHead(500); res.end("Dashboard asset unavailable"); }

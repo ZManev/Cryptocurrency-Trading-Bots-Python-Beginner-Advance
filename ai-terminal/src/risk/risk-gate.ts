@@ -14,6 +14,11 @@ export type RiskDecision =
   | { approved: true; intent: TradeIntent; authority: "PAPER_ONLY" }
   | { approved: false; reasons: string[]; authority: "DENY" };
 
+export function analystScorePasses(score: number, minimum: number): boolean {
+  return Number.isFinite(minimum) && minimum >= 0 && minimum <= 100 &&
+    Number.isFinite(score) && score >= 0 && score <= 100 && score >= minimum;
+}
+
 export class RiskEngine {
   constructor(private readonly policy: RiskPolicy) {}
 
@@ -21,8 +26,9 @@ export class RiskEngine {
     const reasons: string[] = [];
     if (this.policy.killSwitch) reasons.push("kill_switch_active");
     if (this.policy.mode !== "paper" || intent.mode !== "paper") reasons.push("only_paper_mode_is_supported");
-    if (intent.notionalUsd <= 0 || intent.notionalUsd > this.policy.maxNotionalUsd) reasons.push("notional_outside_risk_limit");
-    if (analysis.score < this.policy.minAnalystScore) reasons.push("analyst_score_below_threshold");
+    if (!Number.isFinite(this.policy.maxNotionalUsd) || this.policy.maxNotionalUsd <= 0 ||
+        !Number.isFinite(intent.notionalUsd) || intent.notionalUsd <= 0 || intent.notionalUsd > this.policy.maxNotionalUsd) reasons.push("notional_outside_risk_limit");
+    if (!analystScorePasses(analysis.score, this.policy.minAnalystScore)) reasons.push("analyst_score_below_threshold");
     if (this.policy.liveTradingEnabled) reasons.push("live_trading_is_not_supported");
     if (this.policy.signingEnabled) reasons.push("signing_is_not_supported");
     if (this.policy.transactionSubmissionEnabled) reasons.push("transaction_submission_is_not_supported");

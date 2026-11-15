@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { AnalystAgent, FilterAgent, ScoutAgent, type FilterPolicy } from "./agents/agents.js";
-import { defaultRiskPolicy, RiskEngine, type RiskPolicy } from "./risk/risk-gate.js";
+import { analystScorePasses, defaultRiskPolicy, RiskEngine, type RiskPolicy } from "./risk/risk-gate.js";
 import type { Candidate, PipelineResult, TradeIntent } from "./domain/types.js";
 
 const now = () => new Date().toISOString();
@@ -28,10 +28,12 @@ export class TradingTerminal {
   private readonly filter: FilterAgent;
   private readonly analyst = new AnalystAgent();
   private readonly risk: RiskEngine;
+  private readonly riskPolicy: RiskPolicy;
 
   constructor(private readonly config: TerminalConfig = defaultTerminalConfig) {
     this.filter = new FilterAgent(config.filter);
-    this.risk = new RiskEngine(config.risk);
+    this.riskPolicy = { ...config.risk };
+    this.risk = new RiskEngine(this.riskPolicy);
   }
 
   process(candidates: readonly Candidate[]): PipelineResult[] {
@@ -54,7 +56,7 @@ export class TradingTerminal {
       const analysis = this.analyst.score(candidate);
       events.push({
         agent: "ANALYST",
-        status: analysis.score >= this.config.risk.minAnalystScore ? "PASS" : "BLOCKED",
+        status: analystScorePasses(analysis.score, this.riskPolicy.minAnalystScore) ? "PASS" : "BLOCKED",
         message: `Score ${analysis.score}/100`,
         at: now()
       });
