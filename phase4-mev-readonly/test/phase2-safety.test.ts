@@ -10,6 +10,7 @@ const candidate: TradeCandidate = {
   inputMint: "So11111111111111111111111111111111111111112",
   outputMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
   inputAmount: 1_000n,
+  nativeInputDebitLamports: 1_000n,
   expectedOutputAmount: 2_000n,
   minimumOutputAmount: 1_900n,
   maxSlippageBps: 50,
@@ -19,7 +20,7 @@ const candidate: TradeCandidate = {
   instructions: [{ programId: "AllowedProgram", kind: "swap" }]
 };
 
-test("risk engine accepts only within configured limits and program allowlist", () => {
+test("risk engine counts native input + network fee + Jito tip toward total debit", () => {
   const decision = evaluateCandidate(candidate, {
     maxTotalDebitLamports: 10_000n,
     maxSlippageBps: 100,
@@ -27,7 +28,7 @@ test("risk engine accepts only within configured limits and program allowlist", 
     maxInputAmount: 2_000n
   });
   assert.equal(decision.approved, true);
-  assert.equal(decision.totalDebitLamports, 6_000n);
+  assert.equal(decision.totalDebitLamports, 7_000n);
 });
 
 test("risk engine rejects an unknown program and debit above cap", () => {
@@ -43,7 +44,7 @@ test("risk engine rejects an unknown program and debit above cap", () => {
   });
   assert.equal(decision.approved, false);
   assert.ok(decision.reasons.includes("PROGRAM_NOT_ALLOWLISTED:UnknownProgram"));
-  assert.ok(decision.reasons.includes("TOTAL_FEE_AND_TIP_LIMIT_EXCEEDED"));
+  assert.ok(decision.reasons.includes("TOTAL_DEBIT_LIMIT_EXCEEDED"));
 });
 
 test("execution gate remains closed without independent approvals and all controls", () => {
@@ -60,7 +61,7 @@ test("execution gate remains closed without independent approvals and all contro
   assert.ok(decision.reasons.includes("PHASE1_EVIDENCE_NOT_VERIFIED"));
 });
 
-test("simulation rejects errors and excessive fees", async () => {
+test("simulation rejects errors and excessive fees/debit", async () => {
   const result = await assessSimulation(candidate, {
     getBalance: async () => 100_000n,
     estimateFee: async () => 50_000n,
@@ -73,4 +74,5 @@ test("simulation rejects errors and excessive fees", async () => {
   });
   assert.equal(result.passed, false);
   assert.ok(result.reasons.includes("NETWORK_FEE_LIMIT_EXCEEDED"));
+  assert.ok(result.reasons.includes("TOTAL_DEBIT_LIMIT_EXCEEDED"));
 });
